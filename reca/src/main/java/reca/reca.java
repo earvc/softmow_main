@@ -10,6 +10,8 @@ import java.io.*;
 import java.net.*;
 
 import org.opendaylight.controller.sal.core.Edge;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
 import org.opendaylight.controller.sal.packet.IListenDataPacket;
@@ -167,8 +169,8 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
     private ISwitchManager switchManager = null;
     private IFlowProgrammerService programmer = null;
     private IDataPacketService dataPacketService = null;
-    private ITopologyManager topoManager=null;
-    private IRouting routing=null;
+    private ITopologyManager topoManager = null;
+    private IRouting routing = null;
 
     // Softmow Threads
 	private AgentThread agent;
@@ -273,7 +275,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
      * Function called by the dependency manager before the services
      * exported by the component are unregistered, this will be
      * followed by a "destroy ()" calls
-     *
+      *
      */
     void stop() {
         logger.info("Stopped");
@@ -328,11 +330,19 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
      * implement this by your self
      *******************************************************************/
     private void abstraction(){
-    	System.out.println("Computing Abstraction...");
-    	// compute G-switch by topology
-    	// use ITopologyManager topoManager
+    	System.out.println("Computing New Abstraction");
+        // compute G-switch by topology
+        // use ITopologyManager topoManager
     	// https://developer.cisco.com/media/XNCJavaDocs/org/opendaylight/controller/topologymanager/ITopologyManager.html
-    	
+        System.out.println("-------- Printing Nodes (set of all nodes): Start -------");
+        Set<Node> nodes = switchManager.getNodes();
+        System.out.println(nodes.toString());
+        System.out.println("-------- Printing Nodes (set of all nodes): End ---------");
+
+        System.out.println("-------- Printing Edges (map indexed by the Node and all edges in/out of the node : Start ------------");
+        Map<Node,Set<Edge>> nodeEdges = topoManager.getNodeEdges();
+        System.out.println(nodeEdges.toString());
+        System.out.println("-------- Printing Edges (map indexed by the Node and all edges in/out of the node : End ------------");
     }
     
 	@Override
