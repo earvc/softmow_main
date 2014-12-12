@@ -1,36 +1,84 @@
 #!/usr/bin/python
 
 """
-Create a network where different switches are connected to
-different controllers, by creating a custom Switch() subclass.
+This example creates a multi-controller network from semi-scratch by
+using the net.add*() API and manually starting the switches and
+controllers.
+This is the "mid-level" API, which is an alternative to the "high-level"
+Topo() API which supports parametrized topology classes.
+Note that one could also create a custom switch class and pass it into
+the Mininet() constructor.
 """
 
 from mininet.net import Mininet
-from mininet.node import OVSSwitch, Controller, RemoteController
-from mininet.topolib import TreeTopo
-from mininet.topo import LinearTopo
-from mininet.log import setLogLevel
+from mininet.node import OVSSwitch
 from mininet.cli import CLI
+from mininet.log import setLogLevel
+from mininet.node import RemoteController
 
-setLogLevel( 'info' )
+from softmow_ctl1 import Softmow_Ctl1
+from softmow_ctl2 import Softmow_Ctl2
 
-# Two local and one "external" controller (which is actually c0)
-# Ignore the warning message that the remote isn't (yet) running
-c0 = Controller( 'c0', ip='127.0.0.1' )
-c2 = RemoteController( 'c2', ip='129.236.231.133' )
+def multiControllerNet():
+    "Create a network from semi-scratch with multiple controllers."
+    
+    setLogLevel( 'info' )
+    
+    net = Mininet( switch=OVSSwitch )
+    
 
-cmap = { 's1': c0, 's2': c2 }
+    print "*** Creating controllers"
+    c1 = net.addController( 'c1', controller=RemoteController, ip='127.0.0.1' )
+    c2 = net.addController( 'c2', controller=RemoteController, ip='129.236.231.133' )
+    c3 = net.addController( 'c3', controller=RemoteController, ip='160.39.222.59' )
+    
+    print "*** Creating switches"
+    s1 = net.addSwitch( 's1' )
+    s2 = net.addSwitch( 's2' )
+    s3 = net.addSwitch( 's3' )
+    s4 = net.addSwitch( 's4' )
+    s5 = net.addSwitch( 's5' )
+    
+    print "*** Creating hosts"
+    h1 = net.addHost( 'h1' )
+    h2 = net.addHost( 'h2' )
+    h3 = net.addHost( 'h3' )
+    h4 = net.addHost( 'h4' )
+    h5 = net.addHost( 'h5' )
+    
+    print "*** Creating links"
+    # add one host per switch
+    net.addLink( s1, h1 )
+    net.addLink( s2, h2 )
+    net.addLink( s3, h3 )
+    net.addLink( s4, h4 )
+    net.addLink( s5, h5 )
 
-class MultiSwitch( OVSSwitch ):
-    "Custom Switch() subclass that connects to different controllers"
-    def start( self, controllers ):
-        return OVSSwitch.start( self, [ cmap[ self.name ] ] )
+    # link s2 and s3
+    net.addLink( s2, s3 )
+    #net.addLink( c2, c3 )
+    #net.addLink( c1, c3 )
 
-topo = LinearTopo( k=2, n=1 )
-net = Mininet( topo=topo, switch=MultiSwitch, build=False )
-for c in [ c0, c2 ]:
-    net.addController(c)
-net.build()
-net.start()
-CLI( net )
-net.stop()
+    print "*** Starting network"
+    net.build()
+    c1.start()
+    c2.start()
+    c3.start()
+    s1.start( [ c1 ] )
+    s2.start( [ c1 ] )
+    s3.start( [ c2 ] )
+    s4.start( [ c2 ] )
+    s5.start( [ c3 ] )
+
+    print "*** Testing network"
+    #net.pingAll()
+
+    print "*** Running CLI"
+    CLI( net )
+
+    print "*** Stopping network"
+    #net.stop()
+
+if __name__ == '__main__':
+    setLogLevel( 'info' ) # for CLI output
+    multiControllerNet()
