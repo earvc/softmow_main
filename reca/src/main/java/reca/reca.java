@@ -338,12 +338,14 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
 	@Override
 	public void edgeOverUtilized(Edge arg0) {
 		// TODO Auto-generated method stub
+        System.out.println("RecA ======> TOPO UPDATE ========> edgeOverUtilized");
 	}
 
 	@Override
 	public void edgeUpdate(List<TopoEdgeUpdate> arg0) {
 		// TODO Auto-generated method stub
-		abstraction();
+        System.out.println("RecA ======> TOPO UPDATE ========> edgeUpdate");
+        abstraction();
 		setChanged();
 		notifyObservers(new Msg(TYPE.TOPO_CHANGE, null));
 	}
@@ -351,6 +353,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
 	@Override
 	public void edgeUtilBackToNormal(Edge arg0) {
 		// TODO Auto-generated method stub
+        System.out.println("RecA ======> TOPO UPDATE ========> edgeUtilBackToNormal");
 		abstraction();
 		setChanged();
 		notifyObservers(new Msg(TYPE.TOPO_CHANGE, null));
