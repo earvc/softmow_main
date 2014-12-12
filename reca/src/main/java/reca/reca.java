@@ -339,10 +339,15 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         System.out.println(nodes.toString());
         System.out.println("-------- Printing Nodes (set of all nodes): End ---------");
 
-        System.out.println("-------- Printing Edges (map indexed by the Node and all edges in/out of the node : Start ------------");
+        System.out.println("-------- Printing Node Edges (map indexed by the Node and all edges in/out of the node : Start ------------");
         Map<Node,Set<Edge>> nodeEdges = topoManager.getNodeEdges();
         System.out.println(nodeEdges.toString());
-        System.out.println("-------- Printing Edges (map indexed by the Node and all edges in/out of the node : End ------------");
+        System.out.println("-------- Printing Node Edges (map indexed by the Node and all edges in/out of the node : End ------------");
+        
+		System.out.println("-------- Printing All Edges (Retrieves a map of all known link connections between nodes including their properties");
+        Map<Edge,Set<Property>> allEdges = topoManager.getEdges();
+        System.out.println(allEdges.toString());
+		System.out.println("-------- Printing All Edges (Retrieves a map of all known link connections between nodes including their properties");
     }
     
 	@Override
