@@ -334,15 +334,37 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         // compute G-switch by topology
         // use ITopologyManager topoManager
     	// https://developer.cisco.com/media/XNCJavaDocs/org/opendaylight/controller/topologymanager/ITopologyManager.html
-        System.out.println("-------- Printing Nodes (set of all nodes): Start -------");
-        Set<Node> nodes = switchManager.getNodes();
-        System.out.println(nodes.toString());
-        System.out.println("-------- Printing Nodes (set of all nodes): End ---------");
+        //System.out.println("-------- Printing Nodes (set of all nodes): Start -------");
+        //Set<Node> nodes = switchManager.getNodes();
+        //System.out.println(nodes.toString());
+        //System.out.println("-------- Printing Nodes (set of all nodes): End ---------");
 
-        System.out.println("-------- Printing Edges (map indexed by the Node and all edges in/out of the node : Start ------------");
-        Map<Node,Set<Edge>> nodeEdges = topoManager.getNodeEdges();
-        System.out.println(nodeEdges.toString());
-        System.out.println("-------- Printing Edges (map indexed by the Node and all edges in/out of the node : End ------------");
+        System.out.println("-------- Computing the new abstraction : Start ------------");
+        Iterator iter_edges;
+        
+        // In/out edges indexed by Node
+        Map<Node,Set<Edge>> domainEdges = topoManager.getNodeEdges();
+        // Set of the nodes within the domain of this controller
+        Set<Node> domainNodes = switchManager.getNodes();
+
+        for (Map.Entry<Node, Set<Edge>> entry : domainEdges.entrySet()) { 
+            
+            System.out.println("**** Itering through the edges of Node : *****" + entry.getKey());
+            
+            iter_edges = entry.getValue().iterator();
+
+            while (iter_edges.hasNext()) { 
+                    Edge edge = (Edge) iter_edges.next();
+                    System.out.println("            ==== Considering edge : " + edge.toString());
+                    Node head = edge.getHeadNodeConnector().getNode();
+                    Node tail = edge.getTailNodeConnector().getNode();
+                    if (!domainNodes.contains(head))
+                        System.out.println("Node : " + head.toString() + "is external to the domain.");    
+                    if (!domainNodes.contains(tail))
+                        System.out.println("Node : " + head.toString() + "is external to the domain.");    
+            }
+        }
+        System.out.println("-------- Computing the new abstraction: End ------------");
     }
     
 	@Override
