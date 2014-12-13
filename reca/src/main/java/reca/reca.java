@@ -29,91 +29,15 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class UDPClient {
-	private InetAddress serverIPAddress;
-	private int serverPort;
-	private int clientPort;
-	private DatagramSocket clientSocket;
-	private DatagramPacket sendPacket;
 
-	UDPClient(String serverIP, int serverPort, int clientPort) throws Exception {
-		try {
-			this.serverIPAddress = InetAddress.getByName(serverIP);
-			this.serverPort = serverPort;
-			this.clientPort = clientPort;
-		}
-		catch (UnknownHostException ex) {
-			System.err.println(ex);
-		}
-	}
-
-	public void openSocket() throws Exception {
-		try {
-			clientSocket = new DatagramSocket(clientPort);
-		} 
-		catch (SocketException ex) {
-			System.err.println(ex);
-		}
-	}
-
-	public void sendDatagram(byte[] payload) throws Exception {
-		try {
-			sendPacket = new DatagramPacket(payload, payload.length, serverIPAddress, serverPort);
-			clientSocket.send(sendPacket);
-		}
-		catch (IOException ex) {
-			System.err.println(ex);
-		}
-	}
-}
-
-class UDPServer {
-	private DatagramSocket serverSocket;
-	private int serverPort;
-	byte[] payload = null;
-	DatagramPacket receivePacket = null;
-
-	UDPServer() {
-		payload = new byte[1024];
-		receivePacket = new DatagramPacket(payload, payload.length);
-	}
-	
-	public void openSocket() throws Exception {
-		try {
-			serverSocket = new DatagramSocket(serverPort);
-		}
-		catch (SocketException ex) {
-			System.err.println(ex);
-		}
-	}
-
-	public DatagramPacket recvDatagram() throws Exception {
-		try {
-			serverSocket.receive(receivePacket);
-		}
-		catch (Exception ex) {
-			System.err.println(ex);
-		}
-		return receivePacket;
-	}
-}
-
-class AgentSignal {
-	protected boolean packetReceived = false;
-
-	public synchronized boolean packetReceived() {
-		return this.packetReceived;
-	}
-}
-
-class AgentThread extends Thread {
+class AgentThreadReceive extends Thread {
 	private Thread t; 
 	private String threadName;
 	private int myPort;
 	private DatagramPacket receivedPacket = null;
 	private DatagramSocket listenSocket = null;
 
-	AgentThread(String name, int myPort) {
+	AgentThreadReceive(String name, int myPort) {
 		this.threadName = name;
 		this.myPort = myPort;
 		System.out.println("Creating " + threadName);
@@ -163,6 +87,37 @@ class AgentThread extends Thread {
 	}
 }
 
+class AgentSendParent {
+	private String parentIP;
+	private int parentPort;
+	private DatagramSocket parentSocket = null;
+	private DatagramPacket packetToSend = null;
+
+	AgentSendParent(String parentIP, int parentPort) {
+		this.parentIP = parentIP;
+		this.parentPort = parentPort;
+		
+		// create socket to export abstraction to parent
+		try {
+			parentSocket = new DatagramSocket();
+		} catch (Exception ex) {
+			System.err.println(ex);
+		}
+	}
+
+	public void sendAbstraction(byte [] dataToSend) {
+		try {
+			InetAddress IPAddress = InetAddress.getByName(parentIP);
+			packetToSend = new DatagramPacket(dataToSend, dataToSend.length, IPAddress, parentPort);
+			parentSocket.send(packetToSend);
+			System.out.println("Sending packet with abstraction to parent " + parentIP + ":" + parentPort);
+		} catch (Exception ex) {
+			System.err.println(ex);
+		}
+	}
+}
+
+
 public class reca extends Observable implements IListenTopoUpdates, Observer {
     private static final Logger logger = LoggerFactory
             .getLogger(reca.class);
@@ -172,8 +127,9 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
     private ITopologyManager topoManager = null;
     private IRouting routing = null;
 
-    // Softmow Threads
-	private AgentThread agent;
+    // Softmow objects and variables
+	private AgentThreadReceive agentReceive;
+	private AgentSendParent agentSend;
 
     void setDataPacketService(IDataPacketService s) {
         this.dataPacketService = s;
@@ -310,10 +266,12 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
     	abstraction();
     	
     	// create a thread to listen to mobility application, operatorThread()
-    	agent = new AgentThread("agentThread", 9876);
-    	agent.start();
-    	
+    	    	
     	// create a thread to act as agent. agentThread()
+    	agentReceive = new AgentThreadReceive("agentReceive", 9876);
+    	agentReceive.start();
+
+    	agentSend = new AgentSendParent("127.0.0.1", 6789);
         
         // (Topology discoery approach 2) create a thread to send link discovery message periodically
         // !!!!!!!! important !!!!!!!!!!!!!!!!!!!!
@@ -348,6 +306,9 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         Map<Edge,Set<Property>> allEdges = topoManager.getEdges();
         System.out.println(allEdges.toString());
 		System.out.println("-------- Printing All Edges (Retrieves a map of all known link connections between nodes including their properties");
+
+		String sendData = "===G_SWITCH ABSTRACTION===";
+		agentSend.sendAbstraction(sendData.getBytes());
     }
     
 	@Override
