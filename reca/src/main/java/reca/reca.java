@@ -297,7 +297,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
      * implement this by your self
      *******************************************************************/
     private void abstraction(){
-    	System.out.println("Computing New Abstraction");
+    	System.out.println("Call to abstraction() ; ");
         // compute G-switch by topology
         // use ITopologyManager topoManager
     	// https://developer.cisco.com/media/XNCJavaDocs/org/opendaylight/controller/topologymanager/ITopologyManager.html
@@ -305,6 +305,18 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         //Set<Node> nodes = switchManager.getNodes();
         //System.out.println(nodes.toString());
         //System.out.println("-------- Printing Nodes (set of all nodes): End ---------");
+
+        System.out.println("+++++ Removing previous abstraction.");
+        System.out.println(">>>>>>>>>> Clearing inNodesMap");
+        inNodesMap.clear();
+        System.out.println(">>>>>>>>>> Clearing outNodesMap");
+        outNodesMap.clear();
+        System.out.println(">>>>>>>>>> Clearing inNodesConnectorMap");
+        inNodeConnectorsMap.clear();
+        System.out.println(">>>>>>>>>> Clearing outNodesConnectorMap");
+        outNodeConnectorsMap.clear();
+        System.out.println(">>>>>>>>>> Clearing nb_port");
+        nb_ports = 0;
 
         System.out.println("-------- Computing the new abstraction : Start ------------");
         Iterator iter_edges;
