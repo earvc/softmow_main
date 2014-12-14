@@ -12,6 +12,7 @@ import java.net.*;
 
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
@@ -131,6 +132,13 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
     // Softmow objects and variables
 	private AgentThreadReceive agentReceive;
 	private AgentSendParent agentSend;
+
+    private int nb_ports = 0;
+    private ConcurrentHashMap<Integer,Node> inNodesMap = new ConcurrentHashMap<Integer,Node>();
+    private ConcurrentHashMap<Integer,Node> outNodesMap = new ConcurrentHashMap<Integer,Node>();
+    private ConcurrentHashMap<Integer,NodeConnector> inNodeConnectorsMap = new ConcurrentHashMap<Integer,NodeConnector>();
+    private ConcurrentHashMap<Integer,NodeConnector> outNodeConnectorsMap = new ConcurrentHashMap<Integer,NodeConnector>();
+   
 
     void setDataPacketService(IDataPacketService s) {
         this.dataPacketService = s;
