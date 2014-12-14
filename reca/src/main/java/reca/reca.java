@@ -14,6 +14,7 @@ import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
 import org.opendaylight.controller.sal.packet.IListenDataPacket;
@@ -24,6 +25,7 @@ import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
+import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -38,11 +40,27 @@ class AgentThreadReceive extends Thread {
 	private int myPort;
 	private DatagramPacket receivedPacket = null;
 	private DatagramSocket listenSocket = null;
+	private IDataPacketService agentPacketService; 
 
 	AgentThreadReceive(String name, int myPort) {
 		this.threadName = name;
 		this.myPort = myPort;
 		System.out.println("Creating " + threadName);
+	}
+
+	public NodeConnector getOutgoingNodeConnector(byte[] ldData) {
+		NodeConnector outgoingNodeConnector = null;
+		return outgoingNodeConnector;
+	}
+
+	public void sendMessageToSwitch(byte[] sendData, NodeConnector outgoingNodeConnector) {
+		try {
+			RawPacket destPacket = new RawPacket(sendData);
+			destPacket.setOutgoingNodeConnector(outgoingNodeConnector);
+			agentPacketService.transmitDataPacket(destPacket);
+		} catch (Exception ex) {
+			System.err.println(ex);
+		}
 	}
 
 	public void handlePacket(DatagramPacket receivedPacket) {
@@ -107,6 +125,7 @@ class AgentSendParent {
 		}
 	}
 
+
 	public void sendAbstraction(byte [] dataToSend) {
 		try {
 			InetAddress IPAddress = InetAddress.getByName(parentIP);
@@ -128,6 +147,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
     private IDataPacketService dataPacketService = null;
     private ITopologyManager topoManager = null;
     private IRouting routing = null;
+    private ITopologyService topoService = null;
 
     // Softmow objects and variables
 	private AgentThreadReceive agentReceive;
@@ -148,6 +168,16 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         if (this.dataPacketService == s) {
             this.dataPacketService = null;
         }
+    }
+
+	void setTopologyService(ITopologyService s) {
+        this.topoService = s;
+    }
+
+	void unsetTopologyService(ITopologyService s) {
+		if (this.topoService == s) {
+			this.topoService = null;
+		}
     }
 
     public void setFlowProgrammerService(IFlowProgrammerService s)
@@ -321,19 +351,22 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         Map<Node,Set<Edge>> domainEdges = topoManager.getNodeEdges();
         // Set of the nodes within the domain of this controller
         Set<Node> domainNodes = switchManager.getNodes();
-
+		System.out.println("*** Domain C1 ***");
+        
         for (Map.Entry<Node, Set<Edge>> entry : domainEdges.entrySet()) { 
             
             System.out.println("**** Itering through the edges of Node : *****" + entry.getKey());
             
             iter_edges = entry.getValue().iterator();
 
+
             while (iter_edges.hasNext()) { 
                     Edge edge = (Edge) iter_edges.next();
                     System.out.println("            ==== Considering edge : " + edge.toString());
                     Node head = edge.getHeadNodeConnector().getNode();
                     Node tail = edge.getTailNodeConnector().getNode();
-                    if (!domainNodes.contains(head)) {
+
+					if (!domainNodes.contains(head)) {
                         System.out.println("Node : " + head.toString() + "is external to the domain.");
                         System.out.println("OUT");
                         System.out.println("Node : " + tail.toString() + "will be mapped t a G-Switch port");
@@ -374,6 +407,36 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
 
 	@Override
 	public void edgeUpdate(List<TopoEdgeUpdate> arg0) {
+		// sleep to allow NIB to to update before we check the NIB
+		try {
+			Thread.sleep(5000);
+		} catch (Exception ex) {
+			Thread.currentThread().interrupt();
+		}
+
+		for (TopoEdgeUpdate update : arg0) {
+			Edge newEdge = update.getEdge();
+			UpdateType updateType = update.getUpdateType();
+			Set<Property> edgeProperties = update.getProperty();
+
+			switch (updateType) {
+				case ADDED:
+					System.out.println("### Edge update is ADDED ###");
+					break;
+				
+				case REMOVED:
+					System.out.println("### Edge update is REMOVED ###");
+					break;
+
+				case CHANGED:
+					System.out.println("### Edge update is CHANGED ###");
+					break;
+
+				default:
+					break;
+			}
+		}
+		
 		// TODO Auto-generated method stub
         System.out.println("RecA ======> TOPO UPDATE ========> edgeUpdate");
         abstraction();
