@@ -304,6 +304,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         Map<Node,Set<Edge>> domainEdges = topoManager.getNodeEdges();
         // Set of the nodes within the domain of this controller
         Set<Node> domainNodes = switchManager.getNodes();
+        
 
         for (Map.Entry<Node, Set<Edge>> entry : domainEdges.entrySet()) { 
             
@@ -319,7 +320,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
                     if (!domainNodes.contains(head))
                         System.out.println("Node : " + head.toString() + "is external to the domain.");    
                     if (!domainNodes.contains(tail))
-                        System.out.println("Node : " + head.toString() + "is external to the domain.");    
+                        System.out.println("Node : " + tail.toString() + "is external to the domain.");    
             }
         }
         System.out.println("-------- Computing the new abstraction: End ------------");
