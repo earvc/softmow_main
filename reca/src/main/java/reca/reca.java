@@ -349,6 +349,17 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         }
         System.out.println("+++++ Computing the new abstraction: End ");
 
+        System.out.println("+++++ Debug map edges ");
+        System.out.println(">>>>>>>>>>>>> Printing inNodesMap");
+        System.out.println(inNodesMap.toString());
+        System.out.println(">>>>>>>>>>>>> Printing outNodesMap");
+        System.out.println(outNodesMap.toString());
+        System.out.println(">>>>>>>>>>>>> Printing inNodeConnectorsMap");
+        System.out.println(inNodeConnectorsMap.toString());
+        System.out.println(">>>>>>>>>>>>> Printing outNodeConnectorsMap");
+        System.out.println(outNodeConnectorsMap.toString());
+        System.out.println(">>>>>>>>>>>>> Printing outNodeConnectorsMap");
+        System.out.println(nb_ports);
     }
     
 	@Override
