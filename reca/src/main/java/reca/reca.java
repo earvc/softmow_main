@@ -301,31 +301,26 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         // compute G-switch by topology
         // use ITopologyManager topoManager
     	// https://developer.cisco.com/media/XNCJavaDocs/org/opendaylight/controller/topologymanager/ITopologyManager.html
-        //System.out.println("-------- Printing Nodes (set of all nodes): Start -------");
-        //Set<Node> nodes = switchManager.getNodes();
-        //System.out.println(nodes.toString());
-        //System.out.println("-------- Printing Nodes (set of all nodes): End ---------");
 
         System.out.println("+++++ Removing previous abstraction.");
-        System.out.println(">>>>>>>>>> Clearing inNodesMap");
+        System.out.println(">>>>>>>>>>>>> Clearing inNodesMap");
         inNodesMap.clear();
-        System.out.println(">>>>>>>>>> Clearing outNodesMap");
+        System.out.println(">>>>>>>>>>>>> Clearing outNodesMap");
         outNodesMap.clear();
-        System.out.println(">>>>>>>>>> Clearing inNodesConnectorMap");
+        System.out.println(">>>>>>>>>>>>> Clearing inNodesConnectorMap");
         inNodeConnectorsMap.clear();
-        System.out.println(">>>>>>>>>> Clearing outNodesConnectorMap");
+        System.out.println(">>>>>>>>>>>>> Clearing outNodesConnectorMap");
         outNodeConnectorsMap.clear();
-        System.out.println(">>>>>>>>>> Clearing nb_port");
+        System.out.println(">>>>>>>>>>>>> Clearing nb_port");
         nb_ports = 0;
 
-        System.out.println("-------- Computing the new abstraction : Start ------------");
+        System.out.println("+++++ Computing the new abstraction : Start");
         Iterator iter_edges;
         
         // In/out edges indexed by Node
         Map<Node,Set<Edge>> domainEdges = topoManager.getNodeEdges();
         // Set of the nodes within the domain of this controller
         Set<Node> domainNodes = switchManager.getNodes();
-        
 
         for (Map.Entry<Node, Set<Edge>> entry : domainEdges.entrySet()) { 
             
@@ -352,7 +347,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
                     }
             }
         }
-        System.out.println("-------- Computing the new abstraction: End ------------");
+        System.out.println("+++++ Computing the new abstraction: End ");
 
     }
     
