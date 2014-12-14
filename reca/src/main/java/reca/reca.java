@@ -15,7 +15,6 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
-import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageReadWrite;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
 import org.opendaylight.controller.sal.packet.IListenDataPacket;
@@ -27,7 +26,6 @@ import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.sal.topology.ITopologyService;
-import org.openflow.protocol.OFMessage;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -50,15 +48,19 @@ class AgentThreadReceive extends Thread {
 		System.out.println("Creating " + threadName);
 	}
 
-	public NodeConnector getOutgoingNodeConnector(byte[] ldData {
+	public NodeConnector getOutgoingNodeConnector(byte[] ldData) {
 		NodeConnector outgoingNodeConnector = null;
 		return outgoingNodeConnector;
 	}
 
-	public void sendMessageToSwitch(byte[] sendData, NodeConnector outgoingConnector) {
-		RawPacket destPacket = new RawPacket(sendData);
-		destPacket.setOutgoingNodeConnector(outgoingNodeConnector);
-		agentPacketService.transmitDataPacket(destPacket);
+	public void sendMessageToSwitch(byte[] sendData, NodeConnector outgoingNodeConnector) {
+		try {
+			RawPacket destPacket = new RawPacket(sendData);
+			destPacket.setOutgoingNodeConnector(outgoingNodeConnector);
+			agentPacketService.transmitDataPacket(destPacket);
+		} catch (Exception ex) {
+			System.err.println(ex);
+		}
 	}
 
 	public void handlePacket(DatagramPacket receivedPacket) {
@@ -110,7 +112,6 @@ class AgentSendParent {
 	private int parentPort;
 	private DatagramSocket parentSocket = null;
 	private DatagramPacket packetToSend = null;
-	private IMessageReadWrite ofHandle;
 
 	AgentSendParent(String parentIP, int parentPort) {
 		this.parentIP = parentIP;
@@ -124,9 +125,6 @@ class AgentSendParent {
 		}
 	}
 
-	public void sendOFMsg(OFMessage msg) {
-		System.out.println("Send OFMessage");
-	}
 
 	public void sendAbstraction(byte [] dataToSend) {
 		try {
