@@ -2,6 +2,7 @@ package reca;
 
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.*;
 import java.lang.Thread;
 import java.lang.Object;
@@ -11,6 +12,7 @@ import java.net.*;
 
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageReadWrite;
@@ -152,6 +154,13 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
     // Softmow objects and variables
 	private AgentThreadReceive agentReceive;
 	private AgentSendParent agentSend;
+
+    private int nb_ports = 0;
+    private ConcurrentHashMap<Integer,Node> inNodesMap = new ConcurrentHashMap<Integer,Node>();
+    private ConcurrentHashMap<Integer,Node> outNodesMap = new ConcurrentHashMap<Integer,Node>();
+    private ConcurrentHashMap<Integer,NodeConnector> inNodeConnectorsMap = new ConcurrentHashMap<Integer,NodeConnector>();
+    private ConcurrentHashMap<Integer,NodeConnector> outNodeConnectorsMap = new ConcurrentHashMap<Integer,NodeConnector>();
+   
 
     void setDataPacketService(IDataPacketService s) {
         this.dataPacketService = s;
@@ -320,16 +329,24 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
      * implement this by your self
      *******************************************************************/
     private void abstraction(){
-    	System.out.println("Computing New Abstraction");
+    	System.out.println("Call to abstraction() ; ");
         // compute G-switch by topology
         // use ITopologyManager topoManager
     	// https://developer.cisco.com/media/XNCJavaDocs/org/opendaylight/controller/topologymanager/ITopologyManager.html
-        //System.out.println("-------- Printing Nodes (set of all nodes): Start -------");
-        //Set<Node> nodes = switchManager.getNodes();
-        //System.out.println(nodes.toString());
-        //System.out.println("-------- Printing Nodes (set of all nodes): End ---------");
 
-        System.out.println("-------- Computing the new abstraction : Start ------------");
+        System.out.println("+++++ Removing previous abstraction.");
+        System.out.println(">>>>>>>>>>>>> Clearing inNodesMap");
+        inNodesMap.clear();
+        System.out.println(">>>>>>>>>>>>> Clearing outNodesMap");
+        outNodesMap.clear();
+        System.out.println(">>>>>>>>>>>>> Clearing inNodesConnectorMap");
+        inNodeConnectorsMap.clear();
+        System.out.println(">>>>>>>>>>>>> Clearing outNodesConnectorMap");
+        outNodeConnectorsMap.clear();
+        System.out.println(">>>>>>>>>>>>> Clearing nb_port");
+        nb_ports = 0;
+
+        System.out.println("+++++ Computing the new abstraction : Start");
         Iterator iter_edges;
         
         // In/out edges indexed by Node
@@ -350,14 +367,34 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
                     System.out.println("            ==== Considering edge : " + edge.toString());
                     Node head = edge.getHeadNodeConnector().getNode();
                     Node tail = edge.getTailNodeConnector().getNode();
-                    if (!domainNodes.contains(head))
-                        System.out.println("Node : " + head.toString() + " is external to the domain.");    
-                    if (!domainNodes.contains(tail))
-                        System.out.println("Node : " + tail.toString() + " is external to the domain.");    
+
+					if (!domainNodes.contains(head)) {
+                        System.out.println("Node : " + head.toString() + "is external to the domain.");
+                        outNodesMap.put(nb_ports, tail);
+                        outNodeConnectorsMap.put(nb_ports, edge.getTailNodeConnector());
+                        nb_ports++;    
+                    }    
+                    if (!domainNodes.contains(tail)) {
+                        System.out.println("Node : " + tail.toString() + "is external to the domain.");
+                        inNodesMap.put(nb_ports, head);
+                        inNodeConnectorsMap.put(nb_ports, edge.getHeadNodeConnector());
+                        nb_ports++; 
+                    }
             }
         }
-        System.out.println("-------- Computing the new abstraction: End ------------");
+        System.out.println("+++++ Computing the new abstraction: End ");
 
+        System.out.println("+++++ Debug map edges ");
+        System.out.println(">>>>>>>>>>>>> Printing inNodesMap");
+        System.out.println(inNodesMap.toString());
+        System.out.println(">>>>>>>>>>>>> Printing outNodesMap");
+        System.out.println(outNodesMap.toString());
+        System.out.println(">>>>>>>>>>>>> Printing inNodeConnectorsMap");
+        System.out.println(inNodeConnectorsMap.toString());
+        System.out.println(">>>>>>>>>>>>> Printing outNodeConnectorsMap");
+        System.out.println(outNodeConnectorsMap.toString());
+        System.out.println(">>>>>>>>>>>>> Printing outNodeConnectorsMap");
+        System.out.println(nb_ports);
     }
     
 	@Override
