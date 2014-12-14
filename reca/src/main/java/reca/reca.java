@@ -335,12 +335,16 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
                     Node tail = edge.getTailNodeConnector().getNode();
                     if (!domainNodes.contains(head)) {
                         System.out.println("Node : " + head.toString() + "is external to the domain.");
+                        System.out.println("OUT");
+                        System.out.println("Node : " + tail.toString() + "will be mapped t a G-Switch port");
                         outNodesMap.put(nb_ports, tail);
                         outNodeConnectorsMap.put(nb_ports, edge.getTailNodeConnector());
                         nb_ports++;    
                     }    
                     if (!domainNodes.contains(tail)) {
                         System.out.println("Node : " + tail.toString() + "is external to the domain.");
+                        System.out.println("IN");
+                        System.out.println("Node : " + head.toString() + "will be mapped to a G-Switch port.");
                         inNodesMap.put(nb_ports, head);
                         inNodeConnectorsMap.put(nb_ports, edge.getHeadNodeConnector());
                         nb_ports++; 
