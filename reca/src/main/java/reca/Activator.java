@@ -1,6 +1,5 @@
 package reca;
 
-
 import java.util.Hashtable;
 import java.util.Dictionary;
 
@@ -86,15 +85,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                     IDataPacketService.class).setCallbacks(
                     "setDataPacketService", "unsetDataPacketService")
                     .setRequired(true));
-			
+
             c.add(createContainerServiceDependency(containerName).setService(
                     IFlowProgrammerService.class).setCallbacks(
                     "setFlowProgrammerService", "unsetFlowProgrammerService")
-                    .setRequired(true));
-
-			c.add(createContainerServiceDependency(containerName).setService(
-                    ITopologyService.class).setCallbacks(
-                    "setTopologyService", "unsetTopologyservice")
                     .setRequired(true));
             
             c.add(createContainerServiceDependency(containerName).setService(

@@ -11,6 +11,7 @@ import java.io.*;
 import java.net.*;
 
 import org.opendaylight.controller.sal.core.Edge;
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.cor.Name;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -162,7 +163,6 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
     private ConcurrentHashMap<Integer,Node> outNodesMap = new ConcurrentHashMap<Integer,Node>();
     private ConcurrentHashMap<Integer,NodeConnector> inNodeConnectorsMap = new ConcurrentHashMap<Integer,NodeConnector>();
     private ConcurrentHashMap<Integer,NodeConnector> outNodeConnectorsMap = new ConcurrentHashMap<Integer,NodeConnector>();
-   
 
     void setDataPacketService(IDataPacketService s) {
         this.dataPacketService = s;
@@ -337,9 +337,8 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         // compute G-switch by topology
         // use ITopologyManager topoManager
     	// https://developer.cisco.com/media/XNCJavaDocs/org/opendaylight/controller/topologymanager/ITopologyManager.html
-    	//
     	Name myname = new Name
-
+        
         System.out.println("+++++ Removing previous abstraction.");
         System.out.println(">>>>>>>>>>>>> Clearing inNodesMap");
         inNodesMap.clear();
@@ -356,42 +355,41 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         Iterator iter_edges;
         
         // In/out edges indexed by Node
-        Map<Node,Set<Edge>> domainEdges = topoManager.getNodeEdges();
-        // Set of the nodes within the domain of this controller
-        Set<Node> domainNodes = switchManager.getNodes();
+        Map<Node,Set<Edge>> nodeEdges = topoManager.getNodeEdges();
+        Map<Edge,Set<Property>> edges = topoManager.getEdges();
+
 		System.out.println("*** Domain C1 ***");
         
-        for (Map.Entry<Node, Set<Edge>> entry : domainEdges.entrySet()) { 
-            
-            System.out.println("**** Itering through the edges of Node : *****" + entry.getKey());
+        for (Map.Entry<Node, Set<Edge>> entry : nodeEdges.entrySet()) { 
+             
+            System.out.println("**** Itering through the edges of Node : ***** " + entry.getKey());
             
             iter_edges = entry.getValue().iterator();
 
-
             while (iter_edges.hasNext()) { 
-                    Edge edge = (Edge) iter_edges.next();
-                    System.out.println("            ==== Considering edge : " + edge.toString());
-                    Node head = edge.getHeadNodeConnector().getNode();
-                    Node tail = edge.getTailNodeConnector().getNode();
+                Edge edge = (Edge) iter_edges.next();
+                Edge inverse = null;
 
-					if (!domainNodes.contains(head)) {
-                        System.out.println("Node : " + head.toString() + "is external to the domain.");
-                        System.out.println("OUT");
-                        System.out.println("Node : " + tail.toString() + "will be mapped t a G-Switch port");
-                        outNodesMap.put(nb_ports, tail);
-                        outNodeConnectorsMap.put(nb_ports, edge.getTailNodeConnector());
-                        nb_ports++;    
-                    }    
-                    if (!domainNodes.contains(tail)) {
-                        System.out.println("Node : " + tail.toString() + "is external to the domain.");
-                        System.out.println("IN");
-                        System.out.println("Node : " + head.toString() + "will be mapped to a G-Switch port.");
-                        inNodesMap.put(nb_ports, head);
-                        inNodeConnectorsMap.put(nb_ports, edge.getHeadNodeConnector());
-                        nb_ports++; 
-                    }
+                NodeConnector headConnector = edge.getHeadNodeConnector();
+                NodeConnector tailConnector = edge.getTailNodeConnector();
+
+                try { 
+                    inverse = new Edge(headConnector, tailConnector);
+                } catch (ConstructionException e) {};
+                                        
+                System.out.println("            ==== Considering edge : " + edge.toString());
+                    
+                if (!edges.containsKey(inverse)) {
+                    System.out.println("Node : " + headConnector.getNode().toString() + "is external to the domain.");
+                    System.out.println("OUT");
+                    System.out.println("Node : " + tailConnector.getNode().toString() + "will be mapped t a G-Switch port");
+                    outNodesMap.put(nb_ports, tailConnector.getNode());
+                    outNodeConnectorsMap.put(nb_ports, tailConnector);
+                    nb_ports++;    
+                }    
             }
         }
+
         System.out.println("+++++ Computing the new abstraction: End ");
 
         System.out.println("+++++ Debug map edges ");
