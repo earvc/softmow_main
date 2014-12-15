@@ -149,7 +149,6 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
     private ITopologyManager topoManager = null;
     private IRouting routing = null;
     private ITopologyService topoService = null;
-    private IPluginOutConnectionService domainChecker = null;
 
     // Softmow objects and variables
 	private AgentThreadReceive agentReceive;
@@ -171,17 +170,6 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
             this.dataPacketService = null;
         }
     }
-
-	void setDomainChecker(IPluginOutConnectionService s) {
-        this.domainChecker= s;
-    }
-
-    void unsetDomainChecker(IPluginOutConnectionService s) {
-        if (this.domainChecker == s) {
-            this.domainChecker = null;
-        }
-    }
-
 
 	void setTopologyService(ITopologyService s) {
         this.topoService = s;
@@ -365,6 +353,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         // Set of the nodes within the domain of this controller
         Set<Node> domainNodes = switchManager.getNodes();
 		System.out.println("*** Domain C1 ***");
+<<<<<<< HEAD
 
 		// Iterate through nodes and identify which ones are local to this controller
 		// Iterator iter = domainNodes.iterator();
@@ -378,6 +367,8 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
 		//	}
 		//}
 
+=======
+>>>>>>> 2429ba9de9d29e40dff976b3d22fea37964cd2ba
         
         for (Map.Entry<Node, Set<Edge>> entry : domainEdges.entrySet()) { 
            
