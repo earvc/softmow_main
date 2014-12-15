@@ -367,7 +367,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
 		System.out.println("*** Domain C1 ***");
 
 		// Iterate through nodes and identify which ones are local to this controller
-		/*Iterator iter = domainNodes.iterator();
+		Iterator iter = domainNodes.iterator();
 		while(iter.hasNext()) {
 			Node newNode = (Node)iter.next();
 			if (domainChecker.isLocal(newNode)) {
@@ -376,7 +376,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
 			else {
 				System.out.println("***** Node + " + newNode.toString() + " is not local *******");
 			}
-		}*/
+		}
 
         
         for (Map.Entry<Node, Set<Edge>> entry : domainEdges.entrySet()) { 
