@@ -26,7 +26,7 @@ def multiControllerNet():
 
     print "*** Creating controllers"
     c1 = net.addController( 'c1', controller=RemoteController, ip='127.0.0.1' )
-    c2 = net.addController( 'c2', controller=RemoteController, ip='129.236.231.133' )
+    c2 = net.addController( 'c2', controller=RemoteController, ip='160.39.130.141' )
     # c3 = net.addController( 'c3', controller=RemoteController, ip='127.0.0.1' )
     
     print "*** Creating switches"
@@ -37,14 +37,14 @@ def multiControllerNet():
     # s5 = net.addSwitch( 's5' )
     
     print "*** Creating hosts"
-    h1 = net.addHost( 'h1' )
+#    h1 = net.addHost( 'h1' )
     # h2 = net.addHost( 'h2' )
     # h3 = net.addHost( 'h3' )
     # h4 = net.addHost( 'h4' )
     
     print "*** Creating links"
     # add one host per switch
-    net.addLink( s1, h1 )
+#    net.addLink( s1, h1 )
     # net.addLink( s2, h2 )
     # net.addLink( s3, h3 )
     # net.addLink( s4, h4 )
