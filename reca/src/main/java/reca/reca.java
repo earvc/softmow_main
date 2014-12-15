@@ -26,7 +26,7 @@ import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.sal.topology.ITopologyService;
-import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
+import org.opendaylight.controller.connectionmanager.internal.ConnectionManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -149,7 +149,6 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
     private ITopologyManager topoManager = null;
     private IRouting routing = null;
     private ITopologyService topoService = null;
-    private IPluginOutConnectionService domainChecker;
 
     // Softmow objects and variables
 	private AgentThreadReceive agentReceive;
@@ -356,16 +355,16 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
 		System.out.println("*** Domain C1 ***");
 
 		// Iterate through nodes and identify which ones are local to this controller
-		Iterator iter = domainNodes.iterator();
-		while(iter.hasNext()) {
-			Node newNode = (Node)iter.next();
-			if (domainChecker.isLocal(newNode)) {
-				System.out.println("***** Node + " + newNode.toString() + " is local *******");
-			}
-			else {
-				System.out.println("***** Node + " + newNode.toString() + " is not local *******");
-			}
-		}
+		// Iterator iter = domainNodes.iterator();
+		// while(iter.hasNext()) {
+		// 	Node newNode = (Node)iter.next();
+		//	if (domainChecker.isLocal(newNode)) {
+		//		System.out.println("***** Node + " + newNode.toString() + " is local *******");
+		//	}
+		//	else {
+		//		System.out.println("***** Node + " + newNode.toString() + " is not local *******");
+		//	}
+		//}
 
         
         for (Map.Entry<Node, Set<Edge>> entry : domainEdges.entrySet()) { 
