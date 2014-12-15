@@ -226,6 +226,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
             this.routing = null;
         }
     }
+
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
@@ -332,7 +333,23 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         // use ITopologyManager topoManager
     	// https://developer.cisco.com/media/XNCJavaDocs/org/opendaylight/controller/topologymanager/ITopologyManager.html
     
-        /****** Actual Implementation ******/
+
+        /* ***** Debug Version 1 ***** */
+        System.out.println("***** Hard Coded Version  *****");
+        inNodesMap.clear();
+        outNodesMap.clear();
+        inNodeConnectorsMap.clear();
+        outNodeConnectorsMap.clear();
+
+        inNodesMap
+
+        
+
+
+
+        /* ***** Actual Implementation ******/
+        /*
+        System.out.println("Actual Implementation ");
         System.out.println("+++++ Removing previous abstraction.");
         System.out.println(">>>>>>>>>>>>> Clearing inNodesMap");
         inNodesMap.clear();
@@ -397,6 +414,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         System.out.println(outNodeConnectorsMap.toString());
         System.out.println(">>>>>>>>>>>>> Printing outNodeConnectorsMap");
         System.out.println(nb_ports);
+        */
     }
     
 	@Override
