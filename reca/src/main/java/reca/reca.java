@@ -13,6 +13,7 @@ import java.net.*;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
@@ -68,10 +69,12 @@ class AgentThreadReceive extends Thread {
 		InetAddress hostAddress = receivedPacket.getAddress();
 		int hostPort = receivedPacket.getPort();
 		String hostIP = hostAddress.getHostAddress();
-		String message = new String(receivedPacket.getData());
+		byte [] ldData = receivedPacket.getData();
+
+		// get outgoing node connector
+		NodeConnector outgoingNode = getOutgoingNodeConnector(ldData);
 
 		System.out.println("Received packet from host " + hostIP + ":" + hostPort);
-		System.out.println("Data: " + message);
 	}
 
 	public void run() {
@@ -153,6 +156,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
     // Softmow objects and variables
 	private AgentThreadReceive agentReceive;
 	private AgentSendParent agentSend;
+	private String myID;
 
     private int nb_ports = 0;
     private ConcurrentHashMap<Integer,Node> inNodesMap = new ConcurrentHashMap<Integer,Node>();
@@ -321,6 +325,8 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
     	
     	setChanged();
     	notifyObservers(new Msg(TYPE.TOPO_CHANGE, null));
+
+    	myID = new String("C1");
     }
 
    
@@ -341,15 +347,12 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         inNodeConnectorsMap.clear();
         outNodeConnectorsMap.clear();
 
-        inNodesMap
-
-        
-
-
 
         /* ***** Actual Implementation ******/
         /*
         System.out.println("Actual Implementation ");
+    	Name myname = new Name
+        
         System.out.println("+++++ Removing previous abstraction.");
         System.out.println(">>>>>>>>>>>>> Clearing inNodesMap");
         inNodesMap.clear();
