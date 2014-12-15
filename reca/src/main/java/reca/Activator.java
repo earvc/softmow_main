@@ -87,30 +87,15 @@ public class Activator extends ComponentActivatorAbstractBase {
                     IDataPacketService.class).setCallbacks(
                     "setDataPacketService", "unsetDataPacketService")
                     .setRequired(true));
-<<<<<<< HEAD
-=======
-			
-<<<<<<< HEAD
 			c.add(createContainerServiceDependency(containerName).setService(
                     IPluginOutConnectionService.class).setCallbacks(
                     "setDomainChecker", "unsetDomainChecker")
                     .setRequired(true));
->>>>>>> 373626c99e082036ccfeb792595aaeffadaea2a2
 
-=======
->>>>>>> 2429ba9de9d29e40dff976b3d22fea37964cd2ba
             c.add(createContainerServiceDependency(containerName).setService(
                     IFlowProgrammerService.class).setCallbacks(
                     "setFlowProgrammerService", "unsetFlowProgrammerService")
                     .setRequired(true));
-<<<<<<< HEAD
-=======
-
-			c.add(createContainerServiceDependency(containerName).setService(
-                    ITopologyService.class).setCallbacks(
-                    "setTopologyService", "unsetTopologyservice")
-                    .setRequired(true));
->>>>>>> 373626c99e082036ccfeb792595aaeffadaea2a2
             
             c.add(createContainerServiceDependency(containerName).setService(
                     IRouting.class).setCallbacks("setRouting",
