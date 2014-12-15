@@ -1,6 +1,5 @@
 package reca;
 
-
 import java.util.Hashtable;
 import java.util.Dictionary;
 
@@ -15,7 +14,6 @@ import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
 import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
-import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
@@ -86,10 +84,6 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createContainerServiceDependency(containerName).setService(
                     IDataPacketService.class).setCallbacks(
                     "setDataPacketService", "unsetDataPacketService")
-                    .setRequired(true));
-			c.add(createContainerServiceDependency(containerName).setService(
-                    IPluginOutConnectionService.class).setCallbacks(
-                    "setDomainChecker", "unsetDomainChecker")
                     .setRequired(true));
 
             c.add(createContainerServiceDependency(containerName).setService(
