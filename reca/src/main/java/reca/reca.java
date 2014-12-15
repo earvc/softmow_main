@@ -354,7 +354,8 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
 		System.out.println("*** Domain C1 ***");
         
         for (Map.Entry<Node, Set<Edge>> entry : domainEdges.entrySet()) { 
-            
+           
+             
             System.out.println("**** Itering through the edges of Node : *****" + entry.getKey());
             
             iter_edges = entry.getValue().iterator();
