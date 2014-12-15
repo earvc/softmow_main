@@ -149,6 +149,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
     private ITopologyManager topoManager = null;
     private IRouting routing = null;
     private ITopologyService topoService = null;
+    private IPluginOutConnectionService domainChecker = null;
 
     // Softmow objects and variables
 	private AgentThreadReceive agentReceive;
@@ -170,6 +171,17 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
             this.dataPacketService = null;
         }
     }
+
+	void setDomainChecker(IPluginOutConnectionService s) {
+        this.domainChecker= s;
+    }
+
+    void unsetDomainChecker(IPluginOutConnectionService s) {
+        if (this.domainChecker == s) {
+            this.domainChecker = null;
+        }
+    }
+
 
 	void setTopologyService(ITopologyService s) {
         this.topoService = s;

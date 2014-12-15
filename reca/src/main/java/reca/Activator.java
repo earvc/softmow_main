@@ -12,8 +12,10 @@ import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
 import org.opendaylight.controller.sal.routing.IRouting;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
+import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
+import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
@@ -85,11 +87,27 @@ public class Activator extends ComponentActivatorAbstractBase {
                     IDataPacketService.class).setCallbacks(
                     "setDataPacketService", "unsetDataPacketService")
                     .setRequired(true));
+<<<<<<< HEAD
+=======
+			
+			c.add(createContainerServiceDependency(containerName).setService(
+                    IPluginOutConnectionService.class).setCallbacks(
+                    "setDomainChecker", "unsetDomainChecker")
+                    .setRequired(true));
+>>>>>>> 373626c99e082036ccfeb792595aaeffadaea2a2
 
             c.add(createContainerServiceDependency(containerName).setService(
                     IFlowProgrammerService.class).setCallbacks(
                     "setFlowProgrammerService", "unsetFlowProgrammerService")
                     .setRequired(true));
+<<<<<<< HEAD
+=======
+
+			c.add(createContainerServiceDependency(containerName).setService(
+                    ITopologyService.class).setCallbacks(
+                    "setTopologyService", "unsetTopologyservice")
+                    .setRequired(true));
+>>>>>>> 373626c99e082036ccfeb792595aaeffadaea2a2
             
             c.add(createContainerServiceDependency(containerName).setService(
                     IRouting.class).setCallbacks("setRouting",
