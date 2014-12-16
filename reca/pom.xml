@@ -23,6 +23,7 @@
         <configuration>
           <instructions>
             <Import-Package>
+              org.opendaylight.controller.connectionmanager,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.packet,
@@ -43,7 +44,7 @@
               reca
             </Export-Package>
             <Bundle-Activator>
-              reca.Activator
+                reca.Activator
             </Bundle-Activator>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
@@ -71,6 +72,11 @@
       </dependency>
 
       <!-- other modules -->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>connectionmanager</artifactId>
+      <version>${connectionmanager.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>switchmanager</artifactId>

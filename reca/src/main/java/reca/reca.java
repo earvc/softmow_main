@@ -10,6 +10,7 @@ import java.lang.Object;
 import java.io.*;
 import java.net.*;
 
+import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
@@ -27,6 +28,7 @@ import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
+import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -152,6 +154,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
     private ITopologyManager topoManager = null;
     private IRouting routing = null;
     private ITopologyService topoService = null;
+    private IConnectionManager connectionManager = (IConnectionManager) ServiceHelper.getGlobalInstance(IConnectionManager.class, this);
 
     // Softmow objects and variables
 	private AgentThreadReceive agentReceive;
@@ -339,13 +342,29 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         // use ITopologyManager topoManager
     	// https://developer.cisco.com/media/XNCJavaDocs/org/opendaylight/controller/topologymanager/ITopologyManager.html
     
+        System.out.println("Trying to determine local nodes using IConnectionManager");
+       
+        // TODO : Handle the fact the getLocalNodes() can return null
+        // when there is no underlying network.
+        
+        Set<Node> localNodes = connectionManager.getLocalNodes();
+        System.out.println("Printing local edges: ");
+        if (localNodes == null)
+            System.out.println("     No local edges to print");
+        else {      
+            Iterator iterLocalEdges = localNodes.iterator();
+            while(iterLocalEdges.hasNext())
+                System.out.println(iterLocalEdges.next().toString());
+        }
+
+
 
         /* ***** Debug Version 1 ***** */
-        System.out.println("***** Hard Coded Version  *****");
+        /* System.out.println("***** Hard Coded Version  *****");
         inNodesMap.clear();
         outNodesMap.clear();
         inNodeConnectorsMap.clear();
-        outNodeConnectorsMap.clear();
+        outNodeConnectorsMap.clear(); */
 
 
         /* ***** Actual Implementation ******/
