@@ -48,16 +48,43 @@ class AgentThreadReceive extends Thread {
 	private IDataPacketService agentPacketService; 
 
 	// members for inter-link discovery
-	private Stack ldStack;
-	private	ByteArrayInputStream ldStackByteInput;
-	private ObjectInput ldInObj;	
+	private Stack ldStack = null;
 
 	AgentThreadReceive(String name, int myPort) {
 		this.threadName = name;
 		this.myPort = myPort;
-		this.ldStack = new Stack();
 		System.out.println("Creating " + threadName);
 	}
+
+	public static byte[] serialize(Object obj) {
+		ByteArrayOutputStream out = null;
+		ObjectOutputStream os = null;
+		
+		try {
+			out = new ByteArrayOutputStream();
+			os = new ObjectOutputStream(out);
+			os.writeObject(obj);
+		} catch (Exception ex) {
+			System.err.println(ex);
+		}
+		return out.toByteArray();
+	}
+
+	public static Object deserialize(byte[] data) {
+		ByteArrayInputStream in = null;
+		ObjectInputStream is = null;
+		Object returnObj = null;
+
+		try {
+			in = new ByteArrayInputStream(data);
+			is = new ObjectInputStream(in);
+			returnObj = is.readObject();
+		} catch (Exception ex) {
+			System.err.println(ex);
+		}
+		return returnObj;
+	}
+
 
 	public NodeConnector getOutgoingNodeConnector(byte[] ldData) {
 		NodeConnector outgoingNodeConnector = null;
@@ -74,14 +101,30 @@ class AgentThreadReceive extends Thread {
 		}
 	}
 
+	public void processLdStack(Stack ldStack) {
+		System.out.println("Processsing stack");
+	}
+		
 	public void handlePacket(DatagramPacket receivedPacket) {
 		InetAddress hostAddress = receivedPacket.getAddress();
 		int hostPort = receivedPacket.getPort();
 		String hostIP = hostAddress.getHostAddress();
 		byte [] ldData = receivedPacket.getData();
 
+		// get stack from data
+		ldStack = (Stack) deserialize(ldData);
+
+		// process stack
+		processLdStack(ldStack);
+
 		// get outgoing node connector
 		NodeConnector outgoingNode = getOutgoingNodeConnector(ldData);
+
+		// serialize ldStack for sending to switch
+		byte [] ldDataToSend = serialize(ldStack);
+
+		// send data to switch to forward for link discovery
+		sendMessageToSwitch(ldDataToSend, outgoingNode);
 
 		System.out.println("Received packet from host " + hostIP + ":" + hostPort);
 	}
