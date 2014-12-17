@@ -243,10 +243,8 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
 	private String myID;
 
     private int nb_ports = 0;
-    private ConcurrentHashMap<Integer,Node> inNodesMap = new ConcurrentHashMap<Integer,Node>();
-    private ConcurrentHashMap<Integer,Node> outNodesMap = new ConcurrentHashMap<Integer,Node>();
-    private ConcurrentHashMap<Integer,NodeConnector> inNodeConnectorsMap = new ConcurrentHashMap<Integer,NodeConnector>();
-    private ConcurrentHashMap<Integer,NodeConnector> outNodeConnectorsMap = new ConcurrentHashMap<Integer,NodeConnector>();
+    private ConcurrentHashMap<Integer,Node> nodesMap = new ConcurrentHashMap<Integer,Node>();
+    private ConcurrentHashMap<Integer,NodeConnector> nodeConnectorsMap = new ConcurrentHashMap<Integer,NodeConnector>();
 
     void setDataPacketService(IDataPacketService s) {
         this.dataPacketService = s;
@@ -422,24 +420,74 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         // compute G-switch by topology
         // use ITopologyManager topoManager
     	// https://developer.cisco.com/media/XNCJavaDocs/org/opendaylight/controller/topologymanager/ITopologyManager.html
-    
-        System.out.println("Trying to determine local nodes using IConnectionManager");
-       
-        // TODO : Handle the fact the getLocalNodes() can return null
-        // when there is no underlying network.
+   
+        /* ***** Actual Implementation ******/
+
+        System.out.println("Actual Implementation ");
+        
+        System.out.println("+++++ Removing previous abstraction.");
+        System.out.println(">>>>>>>>>>>>> Clearing nodesMap");
+        nodesMap.clear();
+        System.out.println(">>>>>>>>>>>>> Clearing nodeConnectorsMap");
+        nodeConnectorsMap.clear();
+        System.out.println(">>>>>>>>>>>>> Clearing nb_port");
+        nb_ports = 0;
+
+        System.out.println("+++++ Computing the new abstraction : Start");
+        
+        System.out.println(">>>>>>>>>>>>> Local nodes :");
         
         Set<Node> localNodes = connectionManager.getLocalNodes();
-        System.out.println("Printing local edges: ");
         if (localNodes == null)
-            System.out.println("     No local edges to print");
+            System.out.println("                 No local nodes to print");
         else {      
             Iterator iterLocalEdges = localNodes.iterator();
             while(iterLocalEdges.hasNext())
-                System.out.println(iterLocalEdges.next().toString());
+                System.out.println("                 " + iterLocalEdges.next().toString());
+        
+            Iterator iter_edges;
+        
+            // In/out edges indexed by Node
+            Map<Node,Set<Edge>> nodeEdges = topoManager.getNodeEdges();
+            Map<Edge,Set<Property>> edges = topoManager.getEdges();
+
+            for (Map.Entry<Node, Set<Edge>> entry : nodeEdges.entrySet()) { 
+                Node currentNode = entry.getKey();
+                System.out.println("Considering Node : " + currentNode.toString()); 
+                if (localNodes.contains(currentNode)) { 
+                    System.out.println("**** Itering through the edges of Node : ***** " + entry.getKey());
+            
+                    iter_edges = entry.getValue().iterator();
+
+                    while (iter_edges.hasNext()) {
+                        Edge edge = (Edge) iter_edges.next(); 
+                        System.out.println("            ==== Considering edge : " + edge.toString());
+                        
+                        Node head = edge.getHeadNodeConnector().getNode();
+                        NodeConnector tail = edge.getTailNodeConnector();
+
+                        if (!localNodes.contains(head)) { 
+                            System.out.println("Node : " + head.toString() + "is external to the domain.");
+                            nodesMap.put(nb_ports, currentNode);
+                            nodeConnectorsMap.put(nb_ports, tail); 
+                            nb_ports++;
+                        }
+                    }
+                }
+                else {
+                    System.out.println(">>>>>>>>>>>>>>>>>>>>>>> Not a local edge");
+                }
+            }
+            System.out.println("+++++ Computing the new abstraction: End ");
+
+            System.out.println("+++++ Debug map edges ");
+            System.out.println(">>>>>>>>>>>>> Printing nodesMap");
+            System.out.println(nodesMap.toString());
+            System.out.println(">>>>>>>>>>>>> Printing nodeConnectorsMap");
+            System.out.println(nodeConnectorsMap.toString());
+            System.out.println(">>>>>>>>>>>>> Printing outNodeConnectorsMap");
+            System.out.println(nb_ports);
         }
-
-
-
         /* ***** Debug Version 1 ***** */
         /* System.out.println("***** Hard Coded Version  *****");
         inNodesMap.clear();
@@ -447,77 +495,6 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         inNodeConnectorsMap.clear();
         outNodeConnectorsMap.clear(); */
 
-
-        /* ***** Actual Implementation ******/
-        /*
-        System.out.println("Actual Implementation ");
-    	Name myname = new Name
-        
-        System.out.println("+++++ Removing previous abstraction.");
-        System.out.println(">>>>>>>>>>>>> Clearing inNodesMap");
-        inNodesMap.clear();
-        System.out.println(">>>>>>>>>>>>> Clearing outNodesMap");
-        outNodesMap.clear();
-        System.out.println(">>>>>>>>>>>>> Clearing inNodesConnectorMap");
-        inNodeConnectorsMap.clear();
-        System.out.println(">>>>>>>>>>>>> Clearing outNodesConnectorMap");
-        outNodeConnectorsMap.clear();
-        System.out.println(">>>>>>>>>>>>> Clearing nb_port");
-        nb_ports = 0;
-
-        System.out.println("+++++ Computing the new abstraction : Start");
-        Iterator iter_edges;
-        
-        // In/out edges indexed by Node
-        Map<Node,Set<Edge>> nodeEdges = topoManager.getNodeEdges();
-        Map<Edge,Set<Property>> edges = topoManager.getEdges();
-
-		System.out.println("*** Domain C1 ***");
-        
-        for (Map.Entry<Node, Set<Edge>> entry : nodeEdges.entrySet()) { 
-             
-            System.out.println("**** Itering through the edges of Node : ***** " + entry.getKey());
-            
-            iter_edges = entry.getValue().iterator();
-
-            while (iter_edges.hasNext()) { 
-                Edge edge = (Edge) iter_edges.next();
-                Edge inverse = null;
-
-                NodeConnector headConnector = edge.getHeadNodeConnector();
-                NodeConnector tailConnector = edge.getTailNodeConnector();
-
-                try { 
-                    inverse = new Edge(headConnector, tailConnector);
-                } catch (ConstructionException e) {};
-                                        
-                System.out.println("            ==== Considering edge : " + edge.toString());
-                    
-                if (!edges.containsKey(inverse)) {
-                    System.out.println("Node : " + headConnector.getNode().toString() + "is external to the domain.");
-                    System.out.println("OUT");
-                    System.out.println("Node : " + tailConnector.getNode().toString() + "will be mapped t a G-Switch port");
-                    outNodesMap.put(nb_ports, tailConnector.getNode());
-                    outNodeConnectorsMap.put(nb_ports, tailConnector);
-                    nb_ports++;    
-                }    
-            }
-        }
-
-        System.out.println("+++++ Computing the new abstraction: End ");
-
-        System.out.println("+++++ Debug map edges ");
-        System.out.println(">>>>>>>>>>>>> Printing inNodesMap");
-        System.out.println(inNodesMap.toString());
-        System.out.println(">>>>>>>>>>>>> Printing outNodesMap");
-        System.out.println(outNodesMap.toString());
-        System.out.println(">>>>>>>>>>>>> Printing inNodeConnectorsMap");
-        System.out.println(inNodeConnectorsMap.toString());
-        System.out.println(">>>>>>>>>>>>> Printing outNodeConnectorsMap");
-        System.out.println(outNodeConnectorsMap.toString());
-        System.out.println(">>>>>>>>>>>>> Printing outNodeConnectorsMap");
-        System.out.println(nb_ports);
-        */
     }
     
 	@Override
