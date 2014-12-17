@@ -183,6 +183,36 @@ class AgentSendParent {
 		}
 	}
 
+	public static byte[] serialize(Object obj) {
+		ByteArrayOutputStream out = null;
+		ObjectOutputStream os = null;
+		
+		try {
+			out = new ByteArrayOutputStream();
+			os = new ObjectOutputStream(out);
+			os.writeObject(obj);
+		} catch (Exception ex) {
+			System.err.println(ex);
+		}
+		return out.toByteArray();
+	}
+
+	public static Object deserialize(byte[] data) {
+		ByteArrayInputStream in = null;
+		ObjectInputStream is = null;
+		Object returnObj = null;
+
+		try {
+			in = new ByteArrayInputStream(data);
+			is = new ObjectInputStream(in);
+			returnObj = is.readObject();
+		} catch (Exception ex) {
+			System.err.println(ex);
+		}
+		return returnObj;
+	}
+
+
 	public void sendAbstraction(byte [] dataToSend) {
 		try {
 			InetAddress IPAddress = InetAddress.getByName(parentIP);
