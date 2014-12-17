@@ -3,6 +3,7 @@ package reca;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Stack;
 import java.util.*;
 import java.lang.Thread;
 import java.lang.Object;
@@ -46,9 +47,15 @@ class AgentThreadReceive extends Thread {
 	private DatagramSocket listenSocket = null;
 	private IDataPacketService agentPacketService; 
 
+	// members for inter-link discovery
+	private Stack ldStack;
+	private	ByteArrayInputStream ldStackByteInput;
+	private ObjectInput ldInObj;	
+
 	AgentThreadReceive(String name, int myPort) {
 		this.threadName = name;
 		this.myPort = myPort;
+		this.ldStack = new Stack();
 		System.out.println("Creating " + threadName);
 	}
 
@@ -105,6 +112,8 @@ class AgentThreadReceive extends Thread {
 			}
 		}
 
+		// create output and input streams for sending serializable data
+
 		System.out.println("Starting thread " + threadName);
 		if (t == null) {
 			t = new Thread(this, threadName);
@@ -130,7 +139,6 @@ class AgentSendParent {
 			System.err.println(ex);
 		}
 	}
-
 
 	public void sendAbstraction(byte [] dataToSend) {
 		try {
