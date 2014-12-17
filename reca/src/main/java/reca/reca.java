@@ -195,6 +195,33 @@ class AgentSendParent {
 	}
 }
 
+class NetworkPort {
+    private final Node node;
+    private final NodeConnector nodeConnector;
+
+    public NetworkPort(Node node, NodeConnector nodeConnector) {
+        this.node = node;
+        this.nodeConnector = nodeConnector;
+    }
+
+    Node getNode() {
+        return node;
+    }
+    
+    NodeConnector getNodeConnector() {
+        return nodeConnector;
+    }
+
+    boolean equals(NetworkPort netPort) {
+        return (this.getNode().equals(netPort.getNode())) && (this.getNodeConnector().equals(netPort.getNodeConnector()));
+    }
+
+    @Override
+    public String toString() {
+            return "{ node : " + node.toString() + "; nodeConnector :  " + nodeConnector.toString() + "}\n";
+    }
+}
+
 
 public class reca extends Observable implements IListenTopoUpdates, Observer {
     private static final Logger logger = LoggerFactory
@@ -213,8 +240,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
 	private String myID;
 
     private int nb_ports = 0;
-    private ConcurrentHashMap<Integer,Node> nodesMap = new ConcurrentHashMap<Integer,Node>();
-    private ConcurrentHashMap<Integer,NodeConnector> nodeConnectorsMap = new ConcurrentHashMap<Integer,NodeConnector>();
+    private ConcurrentHashMap<Integer,NetworkPort> nodesMap = new ConcurrentHashMap<Integer,NetworkPort>();
 
     void setDataPacketService(IDataPacketService s) {
         this.dataPacketService = s;
@@ -398,8 +424,6 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         System.out.println("+++++ Removing previous abstraction.");
         System.out.println(">>>>>>>>>>>>> Clearing nodesMap");
         nodesMap.clear();
-        System.out.println(">>>>>>>>>>>>> Clearing nodeConnectorsMap");
-        nodeConnectorsMap.clear();
         System.out.println(">>>>>>>>>>>>> Clearing nb_port");
         nb_ports = 0;
 
@@ -433,19 +457,31 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
                         Edge edge = (Edge) iter_edges.next(); 
                         System.out.println("            ==== Considering edge : " + edge.toString());
                         
-                        Node head = edge.getHeadNodeConnector().getNode();
-                        NodeConnector tail = edge.getTailNodeConnector();
+                        NodeConnector headConnector = edge.getHeadNodeConnector();
+                        NodeConnector tailConnector = edge.getHeadNodeConnector();
+                        Node head = headConnector.getNode();
+                        Node tail = tailConnector.getNode();
 
                         if (!localNodes.contains(head)) { 
                             System.out.println("Node : " + head.toString() + "is external to the domain.");
-                            nodesMap.put(nb_ports, currentNode);
-                            nodeConnectorsMap.put(nb_ports, tail); 
-                            nb_ports++;
+                            NetworkPort np = new NetworkPort(currentNode, tailConnector);
+                            if (!nodesMap.containsValue(np)) { 
+                                nodesMap.put(nb_ports, np);
+                                nb_ports++;
+                            }
                         }
+                        if (!localNodes.contains(tail)) {
+                            System.out.println("Node : " + tail.toString() + "is external to the domain");
+                            NetworkPort np = new NetworkPort(currentNode, headConnector);
+                            if (!nodesMap.containsValue(np)) { 
+                                nodesMap.put(nb_ports, np);
+                                nb_ports++;
+                            }
+                        } 
                     }
                 }
                 else {
-                    System.out.println(">>>>>>>>>>>>>>>>>>>>>>> Not a local edge");
+                    System.out.println(">>>>>>>>>>>>>>>>>>>>>>> Not a local Node");
                 }
             }
             System.out.println("+++++ Computing the new abstraction: End ");
@@ -453,9 +489,7 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
             System.out.println("+++++ Debug map edges ");
             System.out.println(">>>>>>>>>>>>> Printing nodesMap");
             System.out.println(nodesMap.toString());
-            System.out.println(">>>>>>>>>>>>> Printing nodeConnectorsMap");
-            System.out.println(nodeConnectorsMap.toString());
-            System.out.println(">>>>>>>>>>>>> Printing outNodeConnectorsMap");
+            System.out.println(">>>>>>>>>>>>> Printing nb_ports");
             System.out.println(nb_ports);
         }
         /* ***** Debug Version 1 ***** */
