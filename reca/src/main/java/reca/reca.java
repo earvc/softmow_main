@@ -349,36 +349,10 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         // compute G-switch by topology
         // use ITopologyManager topoManager
     	// https://developer.cisco.com/media/XNCJavaDocs/org/opendaylight/controller/topologymanager/ITopologyManager.html
-    
-        System.out.println("Trying to determine local nodes using IConnectionManager");
-       
-        // TODO : Handle the fact the getLocalNodes() can return null
-        // when there is no underlying network.
-        
-        Set<Node> localNodes = connectionManager.getLocalNodes();
-        System.out.println("Printing local edges: ");
-        if (localNodes == null)
-            System.out.println("     No local edges to print");
-        else {      
-            Iterator iterLocalEdges = localNodes.iterator();
-            while(iterLocalEdges.hasNext())
-                System.out.println(iterLocalEdges.next().toString());
-        }
-
-
-
-        /* ***** Debug Version 1 ***** */
-        /* System.out.println("***** Hard Coded Version  *****");
-        inNodesMap.clear();
-        outNodesMap.clear();
-        inNodeConnectorsMap.clear();
-        outNodeConnectorsMap.clear(); */
-
-
+   
         /* ***** Actual Implementation ******/
-        /*
+
         System.out.println("Actual Implementation ");
-    	Name myname = new Name
         
         System.out.println("+++++ Removing previous abstraction.");
         System.out.println(">>>>>>>>>>>>> Clearing inNodesMap");
@@ -393,44 +367,59 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         nb_ports = 0;
 
         System.out.println("+++++ Computing the new abstraction : Start");
+        
+        System.out.println(">>>>>>>>>> Local nodes :");
+        
+        Set<Node> localNodes = connectionManager.getLocalNodes();
+        if (localNodes == null)
+            System.out.println("                 No local nodes to print");
+        else {      
+            Iterator iterLocalEdges = localNodes.iterator();
+            while(iterLocalEdges.hasNext())
+                System.out.println("                 " + iterLocalEdges.next().toString());
+        }
+        
         Iterator iter_edges;
         
         // In/out edges indexed by Node
         Map<Node,Set<Edge>> nodeEdges = topoManager.getNodeEdges();
         Map<Edge,Set<Property>> edges = topoManager.getEdges();
 
-		System.out.println("*** Domain C1 ***");
-        
         for (Map.Entry<Node, Set<Edge>> entry : nodeEdges.entrySet()) { 
-             
-            System.out.println("**** Itering through the edges of Node : ***** " + entry.getKey());
+            Node currentNode = entry.getKey();
+            System.out.println("Considering Node : " + currentNode.toString()); 
+            if (localNodes.contains(currentNode)) { 
+                System.out.println("**** Itering through the edges of Node : ***** " + entry.getKey());
             
-            iter_edges = entry.getValue().iterator();
+                iter_edges = entry.getValue().iterator();
 
-            while (iter_edges.hasNext()) { 
-                Edge edge = (Edge) iter_edges.next();
-                Edge inverse = null;
+                while (iter_edges.hasNext()) { 
+                    Edge edge = (Edge) iter_edges.next();
+                    Edge inverse = null;
 
-                NodeConnector headConnector = edge.getHeadNodeConnector();
-                NodeConnector tailConnector = edge.getTailNodeConnector();
+                    NodeConnector headConnector = edge.getHeadNodeConnector();
+                    NodeConnector tailConnector = edge.getTailNodeConnector();
 
-                try { 
-                    inverse = new Edge(headConnector, tailConnector);
-                } catch (ConstructionException e) {};
+                    try { 
+                        inverse = new Edge(headConnector, tailConnector);
+                    } catch (ConstructionException e) {};
                                         
-                System.out.println("            ==== Considering edge : " + edge.toString());
+                    System.out.println("            ==== Considering edge : " + edge.toString());
                     
-                if (!edges.containsKey(inverse)) {
-                    System.out.println("Node : " + headConnector.getNode().toString() + "is external to the domain.");
-                    System.out.println("OUT");
-                    System.out.println("Node : " + tailConnector.getNode().toString() + "will be mapped t a G-Switch port");
-                    outNodesMap.put(nb_ports, tailConnector.getNode());
-                    outNodeConnectorsMap.put(nb_ports, tailConnector);
-                    nb_ports++;    
-                }    
+                    if (!edges.containsKey(inverse)) {
+                        System.out.println("Node : " + headConnector.getNode().toString() + "is external to the domain.");
+                        System.out.println("OUT");
+                        System.out.println("Node : " + tailConnector.getNode().toString() + "will be mapped t a G-Switch port");
+                        outNodesMap.put(nb_ports, tailConnector.getNode());
+                        outNodeConnectorsMap.put(nb_ports, tailConnector);
+                        nb_ports++;    
+                    }    
+                }
+            }
+            else {
+                System.out.println(">>>>>>>>>>>>>>>>>>>>>>> Not a local edge");
             }
         }
-
         System.out.println("+++++ Computing the new abstraction: End ");
 
         System.out.println("+++++ Debug map edges ");
@@ -444,7 +433,14 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
         System.out.println(outNodeConnectorsMap.toString());
         System.out.println(">>>>>>>>>>>>> Printing outNodeConnectorsMap");
         System.out.println(nb_ports);
-        */
+       
+        /* ***** Debug Version 1 ***** */
+        /* System.out.println("***** Hard Coded Version  *****");
+        inNodesMap.clear();
+        outNodesMap.clear();
+        inNodeConnectorsMap.clear();
+        outNodeConnectorsMap.clear(); */
+
     }
     
 	@Override
