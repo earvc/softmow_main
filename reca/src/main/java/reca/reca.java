@@ -29,6 +29,7 @@ import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
+import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.osgi.framework.Bundle;
@@ -253,7 +254,7 @@ class NetworkPort {
 }
 
 
-public class reca extends Observable implements IListenTopoUpdates, Observer {
+public class reca extends Observable implements ITopologyManagerAware, Observer {
     private static final Logger logger = LoggerFactory
             .getLogger(reca.class);
     private ISwitchManager switchManager = null;
@@ -474,6 +475,12 @@ public class reca extends Observable implements IListenTopoUpdates, Observer {
             // In/out edges indexed by Node
             Map<Node,Set<Edge>> nodeEdges = topoManager.getNodeEdges();
             Map<Edge,Set<Property>> edges = topoManager.getEdges();
+
+            if (nodeEdges.isEmpty())
+                System.out.println("nodeEdges map is empty");
+            
+            if (edges.isEmpty())
+                System.out.println("edges map is empty");
 
             for (Map.Entry<Node, Set<Edge>> entry : nodeEdges.entrySet()) { 
                 Node currentNode = entry.getKey();
