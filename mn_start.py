@@ -26,15 +26,20 @@ def multiControllerNet():
 
     print "*** Creating controllers"
     c1 = net.addController( 'c1', controller=RemoteController, ip='127.0.0.1' )
-    c2 = net.addController( 'c2', controller=RemoteController, ip='160.39.130.141' )
+    c2 = net.addController( 'c2', controller=RemoteController, ip='160.39.130.61' )
     # c3 = net.addController( 'c3', controller=RemoteController, ip='127.0.0.1' )
     
     print "*** Creating switches"
     s1 = net.addSwitch( 's1' )
-    # s2 = net.addSwitch( 's2' )
+    s2 = net.addSwitch( 's2' )
     s3 = net.addSwitch( 's3' )
-    # s4 = net.addSwitch( 's4' )
-    # s5 = net.addSwitch( 's5' )
+    s4 = net.addSwitch( 's4' )
+
+    s5 = net.addSwitch( 's5' )
+    s6 = net.addSwitch( 's6' )
+    s7 = net.addSwitch( 's7' )
+    s8 = net.addSwitch( 's8' )
+
     
     print "*** Creating hosts"
 #    h1 = net.addHost( 'h1' )
@@ -51,7 +56,7 @@ def multiControllerNet():
     # net.addLink( s5, h5 )
 
     # link s2 and s3
-    net.addLink( s1, s3 )
+    net.addLink( s4, s5 )
     #net.addLink( c2, c3 )
     #net.addLink( c1, c3 )
 
@@ -60,10 +65,14 @@ def multiControllerNet():
     c1.start()
     c2.start()
     s1.start( [ c1 ] )
-    #s2.start( [ c1 ] )
-    s3.start( [ c2 ] )
-    #s4.start( [ c2 ] )
-    #s5.start( [ c3 ] )
+    s2.start( [ c1 ] )
+    s3.start( [ c1 ] )
+    s4.start( [ c1 ] )
+    s5.start( [ c2 ] )
+    s6.start( [ c2 ] )
+    s7.start( [ c2 ] )
+    s8.start( [ c2 ] )
+    
     
     print "*** Testing network"
     #net.pingAll()
