@@ -49,6 +49,7 @@ class AgentThreadReceive extends Thread {
 	private IDataPacketService agentPacketService; 
 
 	// members for inter-link discovery
+	private ConcurrentHashMap<String, List<Integer>> GswToPortListMap = null;
 	private Stack ldStack = null;
 
 	AgentThreadReceive(String name, int myPort) {
@@ -86,7 +87,6 @@ class AgentThreadReceive extends Thread {
 		return returnObj;
 	}
 
-
 	public NodeConnector getOutgoingNodeConnector(byte[] ldData) {
 		NodeConnector outgoingNodeConnector = null;
 		return outgoingNodeConnector;
@@ -102,32 +102,49 @@ class AgentThreadReceive extends Thread {
 		}
 	}
 
+	// processes link discovery stack
 	public void processLdStack(Stack ldStack) {
 		System.out.println("Processsing stack");
 	}
+
+	// checks if abstraction packet sent during child g-switch discovery
+	public boolean isAbsPacket(byte [] rcvData) {
+		return (rcvData[0] == 0);
+	}
 		
+	// handle incoming packet
 	public void handlePacket(DatagramPacket receivedPacket) {
 		InetAddress hostAddress = receivedPacket.getAddress();
 		int hostPort = receivedPacket.getPort();
 		String hostIP = hostAddress.getHostAddress();
-		byte [] ldData = receivedPacket.getData();
+		byte [] rcvData = receivedPacket.getData();
+		ConcurrentHashMap<String, List<Integer>> mapEntry = new ConcurrentHashMap<String, List<Integer>>();
 
-		// get stack from data
-		ldStack = (Stack) deserialize(ldData);
+		if (isAbsPacket(rcvData)) {
+			// first get key value pair from abstraction sent by child proceess
+			mapEntry = (ConcurrentHashMap<String, List<Integer>>) deserialize(rcvData);
+			Iterator it = mapEntry.entrySet().iterator();
+			ConcurrentHashMap.Entry pairs = (ConcurrentHashMap.Entry)it.next();
 
-		// process stack
-		processLdStack(ldStack);
+			// Enter map entry into hashmap
+			GswToPortListMap.put((String)pairs.getKey(), (List<Integer>) pairs.getValue());
+		}
+		else {  // link discovery packet received
+			// get stack from data
+			ldStack = (Stack) deserialize(rcvData);
 
-		// get outgoing node connector
-		NodeConnector outgoingNode = getOutgoingNodeConnector(ldData);
+			// process stack
+			processLdStack(ldStack);
 
-		// serialize ldStack for sending to switch
-		byte [] ldDataToSend = serialize(ldStack);
+			// get outgoing node connector
+			NodeConnector outgoingNode = getOutgoingNodeConnector(rcvData);
 
-		// send data to switch to forward for link discovery
-		sendMessageToSwitch(ldDataToSend, outgoingNode);
+			// serialize ldStack for sending to switch
+			byte [] ldDataToSend = serialize(ldStack);
 
-		System.out.println("Received packet from host " + hostIP + ":" + hostPort);
+			// send data to switch to forward for link discovery
+			sendMessageToSwitch(ldDataToSend, outgoingNode);
+		}
 	}
 
 	public void run() {
