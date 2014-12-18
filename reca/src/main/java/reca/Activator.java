@@ -14,6 +14,7 @@ import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
 import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
+import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
 
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
@@ -70,7 +71,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             // export the services
             Dictionary<String, String> props = new Hashtable<String, String>();
             props.put("salListenerName", "reca");
-            c.setInterface(new String[] { IListenTopoUpdates.class.getName() }, props);
+            c.setInterface(new String[] { ITopologyManagerAware.class.getName() }, props);
 
             // register dependent modules
             c.add(createContainerServiceDependency(containerName).setService(
