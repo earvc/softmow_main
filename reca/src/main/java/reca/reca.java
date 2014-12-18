@@ -87,6 +87,10 @@ class AgentThreadReceive extends Thread {
 		return returnObj;
 	}
 
+	public ConcurrentHashMap<String, List<Integer>> getGswToPortListMap() {
+		return GswToPortListMap;
+	}
+
 	public NodeConnector getOutgoingNodeConnector(byte[] ldData) {
 		NodeConnector outgoingNodeConnector = null;
 		return outgoingNodeConnector;
@@ -104,11 +108,13 @@ class AgentThreadReceive extends Thread {
 
 	// processes link discovery stack
 	public void processLdStack(Stack ldStack) {
+		// TODO: Process link discovery stack
 		System.out.println("Processsing stack");
 	}
 
 	// checks if abstraction packet sent during child g-switch discovery
 	public boolean isAbsPacket(byte [] rcvData) {
+		// TODO: check if it's an abstraction packet
 		return (rcvData[0] == 0);
 	}
 		
@@ -130,6 +136,9 @@ class AgentThreadReceive extends Thread {
 			GswToPortListMap.put((String)pairs.getKey(), (List<Integer>) pairs.getValue());
 		}
 		else {  // link discovery packet received
+
+			// TODO: Implement link discover handling
+
 			// get stack from data
 			ldStack = (Stack) deserialize(rcvData);
 
@@ -183,15 +192,18 @@ class AgentThreadReceive extends Thread {
 	}
 }
 
-class AgentSendParent {
+class AgentSend {
 	private String parentIP;
 	private int parentPort;
 	private DatagramSocket parentSocket = null;
 	private DatagramPacket packetToSend = null;
 
-	AgentSendParent(String parentIP, int parentPort) {
+	private AgentThreadReceive agentReceive = null;
+
+	AgentSend(String parentIP, int parentPort, AgentThreadReceive agentReceive) {
 		this.parentIP = parentIP;
 		this.parentPort = parentPort;
+		this.agentReceive = agentReceive;
 		
 		// create socket to export abstraction to parent
 		try {
@@ -230,6 +242,24 @@ class AgentSendParent {
 		return returnObj;
 	}
 
+	public void initiLinkDiscovery(byte [] dataToSend) {
+		ConcurrentHashMap<String, List<Integer>> GswMap;
+
+		GswMap = agentReceive.getGswToPortListMap();
+
+		Iterator it = GswMap.entrySet().iterator();
+
+		// iterate through all child G-switches
+		while (it.hasNext()) {
+			ConcurrentHashMap.Entry pairs = (ConcurrentHashMap.Entry)it.next();
+
+			// for eac child Gswitch, do a link dsicovery on each port
+			for(Integer port : (List<Integer>) pairs.getKey()) {
+				//TODO: Implement link discover message to send
+				System.out.println("Do link discovery for port");
+			}
+		}
+	}
 
 	public void sendAbstraction(byte [] dataToSend) {
 		try {
@@ -284,7 +314,7 @@ public class reca extends Observable implements ITopologyManagerAware, Observer 
 
     // Softmow objects and variables
 	private AgentThreadReceive agentReceive;
-	private AgentSendParent agentSend;
+	private AgentSend agentSend;
 	private String myID;
 
     private int nb_ports = 0;
@@ -441,7 +471,7 @@ public class reca extends Observable implements ITopologyManagerAware, Observer 
     	agentReceive = new AgentThreadReceive("agentReceive", 9876);
     	agentReceive.start();
 
-    	agentSend = new AgentSendParent("127.0.0.1", 6789);
+    	agentSend = new AgentSend("127.0.0.1", 6789, agentReceive);
         
         // (Topology discoery approach 2) create a thread to send link discovery message periodically
         // !!!!!!!! important !!!!!!!!!!!!!!!!!!!!
